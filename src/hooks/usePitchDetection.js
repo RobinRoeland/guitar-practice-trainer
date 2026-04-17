@@ -5,6 +5,11 @@ export default function usePitchDetection() {
   const [note, setNote] = useState(null);
   const audioContextRef = useRef(null);
 
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)({
+    latencyHint: "interactive",
+  });
+  audioContextRef.current = audioContext;
+
   useEffect(() => {
     let analyser, detector, dataArray;
 
@@ -16,6 +21,8 @@ export default function usePitchDetection() {
 
       const source = audioContext.createMediaStreamSource(stream);
       analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048; // lower = faster, higher = more accurate
+      analyser.smoothingTimeConstant = 0.2;
       source.connect(analyser);
 
       const bufferLength = analyser.fftSize;
@@ -31,9 +38,13 @@ export default function usePitchDetection() {
           audioContext.sampleRate
         );
 
-        if (clarity > 0.9 && pitch) {
+        if (clarity > 0.95 && pitch) {
           const noteName = getNoteFromFrequency(pitch);
-          setNote(noteName);
+
+          setNote((prev) => {
+            if (prev === noteName) return prev;
+            return noteName;
+          });
         }
 
         requestAnimationFrame(detect);

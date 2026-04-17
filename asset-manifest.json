@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/guitar-practice-trainer/static/css/main.9093f298.css",
-    "main.js": "/guitar-practice-trainer/static/js/main.35087926.js",
+    "main.css": "/guitar-practice-trainer/static/css/main.78b391fa.css",
+    "main.js": "/guitar-practice-trainer/static/js/main.a569b796.js",
     "static/js/453.7329a567.chunk.js": "/guitar-practice-trainer/static/js/453.7329a567.chunk.js",
     "index.html": "/guitar-practice-trainer/index.html",
-    "main.9093f298.css.map": "/guitar-practice-trainer/static/css/main.9093f298.css.map",
-    "main.35087926.js.map": "/guitar-practice-trainer/static/js/main.35087926.js.map",
+    "main.78b391fa.css.map": "/guitar-practice-trainer/static/css/main.78b391fa.css.map",
+    "main.a569b796.js.map": "/guitar-practice-trainer/static/js/main.a569b796.js.map",
     "453.7329a567.chunk.js.map": "/guitar-practice-trainer/static/js/453.7329a567.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.9093f298.css",
-    "static/js/main.35087926.js"
+    "static/css/main.78b391fa.css",
+    "static/js/main.a569b796.js"
   ]
 }

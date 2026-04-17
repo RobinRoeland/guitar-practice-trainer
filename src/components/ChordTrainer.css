@@ -53,11 +53,6 @@
   opacity: 0.8;
 }
 
-.fretboard {
-  display: flex;
-  gap: 10px;
-}
-
 .string {
   width: 20px;
   height: 120px;
@@ -65,48 +60,122 @@
   position: relative;
 }
 
-.dot {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, 0);
-  width: 12px;
-  height: 12px;
-  background: #38bdf8;
-  border-radius: 50%;
-}
-
-.fretboard {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background: #222;
-  padding: 20px;
-  border-radius: 10px;
-}
-
-.fret-row {
-  display: flex;
-}
-
 .string-cell {
-  width: 30px;
-  height: 30px;
-  border-right: 1px solid #555;
-  border-bottom: 1px solid #333;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.open {
-  font-size: 12px;
-  text-indent: 214%;
-  color: white;
+/* vertical string line */
+.string-cell::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #555;
+  opacity: 0.6;
 }
 
-.mute {
-  font-size: 12px;
-  text-indent: 260%;
-  color: red;
+.fretboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  background: #222;
+  padding: 20px;
+  border-radius: 10px;
 }
+
+.grid-row.fret-row {
+  border-bottom: 1px solid #333;
+}
+.top-row {
+  border-bottom: 2px solid #777;
+}
+
+/* shared row system */
+.grid-row {
+  display: grid;
+  grid-template-columns: 30px repeat(6, 40px);
+  height: 60px;
+}
+
+/* left label (frets) */
+.fret-label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  color: #aaa;
+  font-size: 12px;
+}
+
+/* string cells */
+.string-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* dot (finger position) */
+.dot {
+  width: 16px;
+  height: 16px;
+  background: #38bdf8;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+/* open/mute */
+.open, .mute {
+  font-size: 12px;
+}
+
+/* optional visual */
+.mute {
+  color: red;
+  z-index: 2;
+  font-size: large;
+}
+.open {
+  color: white;
+  z-index: 2;
+  font-size: large;
+}
+
+.fret-row {
+  position: relative;
+}
+
+/* fret inlay */
+.fret-marker {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #666;
+  border-radius: 50%;
+  top: 50%;
+}
+
+/* single dot centered */
+.fret-marker.single {
+  left: 54%;
+}
+
+.fret-marker.double.left {
+  left: 40%;
+}
+
+.fret-marker.double.right {
+  left: 69%;
+}
+
+.string-cell:nth-child(7)::before { width: 1px; }
+.string-cell:nth-child(6)::before { width: 1.5px; }
+.string-cell:nth-child(5)::before { width: 2px; }
+.string-cell:nth-child(4)::before { width: 2.5px; }
+.string-cell:nth-child(3)::before { width: 3px; }
+.string-cell:nth-child(2)::before { width: 3.5px; }

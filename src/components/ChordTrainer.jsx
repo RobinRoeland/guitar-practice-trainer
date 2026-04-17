@@ -26,30 +26,60 @@ const CHORD_SHAPES = {
 };
 
 function ChordDiagram({ positions = [] }) {
-  const strings = 6;
-  const frets = 5;
+  const fretsToShow = 5;
 
   return (
     <div className="fretboard">
-      {Array.from({ length: frets }).map((_, fretIndex) => (
-        <div key={fretIndex} className="fret-row">
-          {positions.map((pos, stringIndex) => {
-            const isDot = pos === fretIndex + 1;
+      {/* TOP: open / mute indicators */}
+      <div className="grid-row top-row">
+        <div className="fret-label"></div>
 
-            return (
-              <div key={stringIndex} className="string-cell">
-                {isDot && <div className="dot" />}
-                {pos === 0 && fretIndex === 0 && (
-                  <div className="open">○</div>
-                )}
-                {pos === "x" && fretIndex === 0 && (
-                  <div className="mute">x</div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ))}
+        {positions.map((pos, i) => (
+          <div key={i} className="string-cell">
+            {pos === 0 && <div className="open">○</div>}
+            {pos === "x" && <div className="mute">x</div>}
+          </div>
+        ))}
+      </div>
+
+      {/* FRETS */}
+      {Array.from({ length: fretsToShow }).map((_, fretIndex) => {
+        const actualFret = fretIndex + 1;
+
+        const isSingleMarker = [3, 5, 7, 9].includes(actualFret);
+        const isDoubleMarker = [12].includes(actualFret);
+
+        return (
+          <div className="grid-row fret-row" key={fretIndex}>
+            <div className="fret-label">{actualFret}</div>
+
+            {/* 🎸 STRING CELLS */}
+            {positions.map((pos, i) => {
+              const fret = Number(pos);
+              const isDot = fret === actualFret;
+
+              return (
+                <div key={i} className="string-cell">
+                  {isDot && <div className="dot" />}
+                </div>
+              );
+            })}
+
+            {/* 🎯 SINGLE marker (ONE per row) */}
+            {isSingleMarker && (
+              <div className="fret-marker single" />
+            )}
+
+            {/* 🎯 DOUBLE marker (ONE per row) */}
+            {isDoubleMarker && (
+              <>
+                <div className="fret-marker double left" />
+                <div className="fret-marker double right" />
+              </>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -93,10 +123,10 @@ function playChordSound(chord) {
       release: 1.2
     }
   }).toDestination();
-  
+
   const filter = new Tone.Filter(1200, "lowpass").toDestination();
   synth.connect(filter);
-
+  
   const reverb = new Tone.Reverb({
     decay: 2,
     wet: 0.3
@@ -143,11 +173,18 @@ export default function ChordTrainer() {
       playedNotesSet.has(note)
     );
   }
-  
-  const handleNextChord = () => {
-    const nextChord = getNextChord(currentChord);
+
+  function setNewChord(nextChord) {
     setCurrentChord(nextChord);
     playChordSound(nextChord);
+    detectedNotesRef.current.clear();
+  }
+
+  const handleNextChord = () => {
+    const nextChord = getNextChord(currentChord);
+    setNewChord(nextChord);
+    console.log("Chord:", nextChord);
+    console.log("Positions:", CHORD_SHAPES[nextChord]);
   };
 
   function evaluateChord() {

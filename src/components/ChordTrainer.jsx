@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import usePitchDetection from "../hooks/usePitchDetection";
 import * as Tone from "tone";
 import "./ChordTrainer.css";
@@ -26,56 +26,149 @@ const CHORD_SHAPES = {
 };
 
 function ChordDiagram({ positions = [] }) {
-  const fretsToShow = 5;
+  const INLAYS = [3, 5, 7, 9, 12];
+  const STRING_COUNT = 6;
+  const FRET_COUNT = 5; // show up to 5th fret
+
+  const BOARD_WIDTH = 320;
+  const BOARD_HEIGHT = 160;
+  const PADDING_X = 24;
+  const PADDING_Y = 16;
+  
+
+  const INNER_WIDTH = BOARD_WIDTH - PADDING_X * 2;
+  const INNER_HEIGHT = BOARD_HEIGHT - PADDING_Y * 2;
+
+  const STRING_GAP = INNER_WIDTH / (STRING_COUNT - 1);
+  const FRET_GAP = INNER_HEIGHT / (FRET_COUNT - 1);
+
+  const stringWidths = [3.5, 3, 2.5, 2, 1.8, 1.5]; // low → high E
 
   return (
-    <div className="fretboard">
-      {/* TOP: open / mute indicators */}
-      <div className="grid-row top-row">
-        <div className="fret-label"></div>
+    <div
+      className="fretboard"
+      style={{
+        position: "relative",
+        width: `${BOARD_WIDTH}px`,
+        height: `${BOARD_HEIGHT}px`,
+        overflow: "hidden",
+        padding: `${PADDING_Y}px ${PADDING_X}px`,
+        boxSizing: "border-box",
+      }}
+    >
+      {/* 1. STRINGS */}
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          className="string-line"
+          key={i}
+          style={{
+            position: "absolute",
+            left: `${PADDING_X + i * STRING_GAP}px`,
+            top: PADDING_Y,
+            bottom: PADDING_Y,
+            width: `${stringWidths[i]}px`,
+            borderRadius: "2px",
+            transform: "translateX(-50%)",
+          }}
+        />
+      ))}
 
-        {positions.map((pos, i) => (
-          <div key={i} className="string-cell">
-            {pos === 0 && <div className="open">○</div>}
-            {pos === "x" && <div className="mute">x</div>}
-          </div>
-        ))}
-      </div>
+      {/* Open Strings and Don't Play */}
+      {positions.map((pos, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            left: `${PADDING_X + i * STRING_GAP}px`,
+            top: `${PADDING_Y - 12}px`,
+            transform: "translateX(-50%)",
+            fontSize: "12px",
+            color: pos === "x" ? "#ff0000" : "#fff",
+            fontFamily: "monospace",
+          }}
+        >
+          {pos === "x" ? "x" : pos === 0 ? "0" : ""}
+        </div>
+      ))}
 
-      {/* FRETS */}
-      {Array.from({ length: fretsToShow }).map((_, fretIndex) => {
-        const actualFret = fretIndex + 1;
+      {/* Fret Numbers */}
+      {Array.from({ length: FRET_COUNT }).map((_, fret) => (
+        <div
+          key={fret}
+          style={{
+            position: "absolute",
+            top: `${PADDING_Y + fret * FRET_GAP}px`,
+            right: `${BOARD_WIDTH - 14}px`,
+            transform: "translateY(-50%)",
+            fontSize: "11px",
+            color: "#888",
+            fontFamily: "monospace",
+          }}
+        >
+          {fret}
+        </div>
+      ))}
 
-        const isSingleMarker = [3, 5, 7, 9].includes(actualFret);
-        const isDoubleMarker = [12].includes(actualFret);
+      {/* 2. FRETS */}
+      {Array.from({ length: FRET_COUNT }).map((_, fret) => (
+        <div
+          key={fret}
+          style={{
+            position: "absolute",
+            top: `${PADDING_Y + fret * FRET_GAP}px`,
+            left: PADDING_X,
+            right: PADDING_X,
+            height: "1px",
+            background: "#777",
+          }}
+        />
+      ))}
+
+      {/* 3. NOTES (chord dots) */}
+      {positions.map((pos, stringIndex) => {
+        if (pos === "x" || pos === 0) return null;
+
+        const fret = Number(pos);
 
         return (
-          <div className="grid-row fret-row" key={fretIndex}>
-            <div className="fret-label">{actualFret}</div>
+          <div
+            className="note-dot"
+            key={stringIndex}
+            style={{
+              position: "absolute",
+              left: `${PADDING_X + stringIndex * STRING_GAP}px`,
+              top: `${PADDING_Y + fret * FRET_GAP}px`,
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+        );
+      })}
 
-            {/* 🎸 STRING CELLS */}
-            {positions.map((pos, i) => {
-              const fret = Number(pos);
-              const isDot = fret === actualFret;
+      {/* 4. INLAY DOTS */}
+      {INLAYS.map((fret) => {
+        const isDouble = fret === 12;
 
-              return (
-                <div key={i} className="string-cell">
-                  {isDot && <div className="dot" />}
-                </div>
-              );
-            })}
-
-            {/* 🎯 SINGLE marker (ONE per row) */}
-            {isSingleMarker && (
-              <div className="fret-marker single" />
-            )}
-
-            {/* 🎯 DOUBLE marker (ONE per row) */}
-            {isDoubleMarker && (
-              <>
-                <div className="fret-marker double left" />
-                <div className="fret-marker double right" />
-              </>
+        return (
+          <div
+            key={fret}
+            style={{
+              position: "absolute",
+              left: PADDING_X,
+              right: PADDING_X,
+              top: `${PADDING_Y + fret * FRET_GAP}px`,
+              display: "flex",
+              justifyContent: "center",
+              transform: "translateY(-50%)",
+              pointerEvents: "none",
+            }}
+          >
+            {!isDouble ? (
+              <div className="inlay-dot" />
+            ) : (
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <div className="inlay-dot" />
+                <div className="inlay-dot" />
+              </div>
             )}
           </div>
         );
